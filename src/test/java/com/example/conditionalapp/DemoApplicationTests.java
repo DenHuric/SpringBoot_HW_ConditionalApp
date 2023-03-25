@@ -1,7 +1,9 @@
 package com.example.conditionalapp;
 
-import org.junit.Test;
+
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -16,26 +18,20 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 public class DemoApplicationTests {
     @Autowired
     TestRestTemplate restTemplate;
-    //@Container
+    @Container
     private static GenericContainer devApp = new GenericContainer("devapp:latest")
             .withExposedPorts(8080);
-    //@Container
+    @Container
     private static GenericContainer prodApp = new GenericContainer("prodapp:latest")
             .withExposedPorts(8081);
-
-
-    @BeforeEach
-    public void setUp() {
-        devApp.start();
-        prodApp.start();
-    }
 
     @Test
     public void contextLoads() {
         int devPort = devApp.getMappedPort(8080);
         int prodPort = prodApp.getMappedPort(8081);
-        ResponseEntity<String> devResponse = restTemplate.getForEntity("http://localhost:" + devPort, String.class);
-        ResponseEntity<String> prodResponse = restTemplate.getForEntity("http://localhost:" + prodPort, String.class);
-        System.out.println(prodResponse.getBody());
+        ResponseEntity<String> devResponse = restTemplate.getForEntity("http://localhost:" + devPort + "/profile", String.class);
+        ResponseEntity<String> prodResponse = restTemplate.getForEntity("http://localhost:" + prodPort  + "/profile", String.class);
+        Assert.assertEquals("Current profile is dev",devResponse.getBody());
+        Assert.assertEquals("Current profile is production",prodResponse.getBody());
     }
 }
